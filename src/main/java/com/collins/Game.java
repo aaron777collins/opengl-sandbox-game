@@ -1,12 +1,18 @@
 package com.collins;
 
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+
 
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
-import com.collins.display.BasicFrame;
+import com.collins.display.Display;
+import com.collins.display.Loader;
+import com.collins.display.Renderer;
 import com.collins.entities.Entity;
 import com.collins.entities.Square;
 import com.collins.input.GameKeyListener;
@@ -22,19 +28,20 @@ public final class Game {
     public boolean running = false;
     public ArrayList<Entity> entities;
     public GameKeyListener gameKeyListener;
+    public Display display;
 
     public boolean renderTime = false;
     float FPS = 60;
     float UPS = 60;
 
     public void init() {
-        final GLProfile profile = GLProfile.get(GLProfile.GL2);
+        final GLProfile profile = GLProfile.get(GLProfile.GL3);
         final GLCapabilities capabilities = new GLCapabilities(profile);
         
         gljpanel = new GLJPanel(capabilities);
         
-        BasicFrame basicFrame = new BasicFrame(game);
-        gljpanel.addGLEventListener(basicFrame);
+        display = new Display(game);
+        gljpanel.addGLEventListener(display);
 
         gljpanel.setSize(WINDOW_DIMENSIONS);
         gljpanel.setPreferredSize(WINDOW_DIMENSIONS);
@@ -46,7 +53,16 @@ public final class Game {
 
         frame.getContentPane().add(gljpanel);
         frame.setSize(frame.getContentPane().getPreferredSize());
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);        
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        WindowListener exitListener = new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                gljpanel.destroy();
+                System.exit(0);
+            }
+        };
+        frame.addWindowListener(exitListener);
         frame.setVisible(true);
         running = true;
         entities = new ArrayList<Entity>();
